@@ -1,0 +1,98 @@
+module alu(
+   input [31:0] Src1, Src2,
+   input [1:0] AluControl,
+   input clk,
+   output reg [31:0] AluResult,
+   output reg negative, carry, overflow, zero
+);
+
+always @(posedge clk) begin 
+    case (AluControl)
+        2'b00 : begin
+            AluResult = Src1 & Src2;
+            carry = 0;
+            overflow = 0;
+        end
+        2'b01 : begin
+            AluResult = Src1 | Src2;
+            carry = 0;
+            overflow = 0;
+        end
+        2'b10 : begin
+            {carry, AluResult} = Src1 + Src2;
+            overflow = (Src1[31] == Src2[31]) && (AluResult[31] != Src1[31]);
+        end
+        2'b11 : begin
+            {carry, AluResult} = Src1 - Src2;
+            overflow = (Src1[31] != Src2[31]) && (AluResult[31] != Src1[31]);
+        end
+        default : begin
+            AluResult = 0;
+            carry = 0;
+            overflow = 0;
+        end
+    endcase
+
+    zero = (AluResult == 0) ? 1'b1 : 1'b0;
+    negative = AluResult[31];
+end
+
+endmodule
+
+
+
+
+// TEST  BENCH
+
+
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date: 14.06.2025 22:31:32
+// Design Name: 
+// Module Name: alu_tb
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+
+
+module alu_tb;
+   reg [31:0] Src1,Src2;
+   reg [1:0] AluControl;
+   reg clk;
+   wire [31:0] AluResult;
+   wire negative,carry,zero,overflow;
+alu uut(.Src1(Src1),.Src2(Src2),.AluControl(AluControl),.AluResult(AluResult),.clk(clk),.carry(carry),.zero(zero),.overflow(overflow).negative(negative));
+initial begin 
+  clk = 1'b0;
+  #300 $finish;
+  end
+always #5 clk=~clk;
+initial begin
+Src1= 32'h 00000005;
+Src2 = 32'h00000004;
+#16 
+AluControl = 2'b00;
+#10
+AluControl = 2'b01;
+#10 
+AluControl = 2'b10;
+#10 
+AluControl = 2'b11;
+$finish
+end 
+inital begin
+$monitor ($time,"%d,%d,%d", AluResult,Src1,Src2);
+end
+endmodule
