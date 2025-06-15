@@ -1,6 +1,7 @@
 module d_ff ( 
-  input d,clk,reset,
-  output reg q);
+  input clk,reset,
+  input [31:0] d,
+  output reg[31:0] q);
 always @(posedge clk or posedge reset) begin
   if(reset)
   q <= 0;
@@ -11,8 +12,9 @@ always @(posedge clk or posedge reset) begin
 
   //test branch
   module d_tb;
-reg d,clk,reset,
-wire q;
+reg [31:0]d,
+reg clk,reset,
+wire [31:0] q;
 d_ff uut (.d(d),.clk(clk),.reset(reset),.q(q));
 initial begin 
   clk = 1b0;
