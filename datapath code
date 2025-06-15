@@ -1,0 +1,43 @@
+module datapath(
+    input clk, reset,
+    input RegWrite,
+    input [1:0] ALUControl,
+    input ALUSrc, MemtoReg, PCSrc,
+    input [31:0] Instr,
+    input [31:0] ReadData,     // Data read from memory
+    output [31:0] PC,
+    output [31:0] ALUResult, WriteData,
+    output [31:0] InstrOut, ReadDataOut
+);
+
+    wire [31:0] PCNext, PCPlus4, PCPlusImm;
+    wire [31:0] SrcA, SrcB, Result;
+    wire [31:0] ImmExt;
+    wire [31:0] RD1, RD2;
+    wire [3:0] ALUFlags;
+
+    // PC Register
+    mux2 #(32) pcmux(PCPlus4, PCPlusImm, PCSrc, PCNext);
+    flop #(32) pc(clk, reset, PCNext, PC);
+    adder #(32) pcadder1(PC, 32'd4, PCPlus4);
+
+    // Register File
+    mux3 #(32) resmux(ALUResult, ReadData, PCPlus4, MemtoReg, Result);
+    regfile rf(clk, RegWrite, Instr[19:15], Instr[24:20], Instr[11:7], Result, RD1, RD2);
+
+    // Immediate Extract
+    extend ext(Instr[31:7], Instr[6:0], ImmExt); // Sign-extend immediate based on type
+
+    // ALU
+    mux2 #(32) srcbmux(RD2, ImmExt, ALUSrc, SrcB);
+    alu alu1(RD1, SrcB, ALUControl, ALUResult, ALUFlags);
+
+    // Outputs
+    assign WriteData = RD2;
+    assign InstrOut = Instr;
+    assign ReadDataOut = ReadData;
+
+    // Branch Address Calculation
+    adder #(32) pcadder2(PC, ImmExt, PCPlusImm);
+
+endmodule
