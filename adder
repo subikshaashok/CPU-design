@@ -1,0 +1,34 @@
+module adder( 
+   input [31:0] a, 
+   input [31:0] b,
+   output [31:0] y
+);
+   assign y = a + b;
+endmodule
+
+//testbench
+
+module adder_tb;
+
+    // Declare testbench variables
+    reg [31:0] a, b;
+    wire [31:0] y;
+
+    // Instantiate the module under test (MUT)
+    adder uut (
+        .a(a),
+        .b(b),
+        .y(y)
+    );
+
+    initial begin
+        a = 32'd10; b = 32'd15; #10;
+        a = 32'd100; b = 32'd200; #10;
+        a = 32'hFFFFFFFF; b = 32'd1; #10;
+        a = 32'd0; b = 32'd0; #10;
+        a = 32'd4294967295; b = 32'd1; #10;
+        $finish;
+    end
+
+endmodule
+
