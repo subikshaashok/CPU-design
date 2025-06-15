@@ -1,0 +1,28 @@
+module d_ff ( 
+  input d,clk,reset,
+  output reg q);
+always @(posedge clk or posedge reset) begin
+  if(reset)
+  q <= 0;
+  else 
+  q<=d;
+  end 
+  endmodule 
+
+  //test branch
+  module d_tb;
+reg d,clk,reset,
+wire q;
+d_ff uut (.d(d),.clk(clk),.reset(reset),.q(q));
+initial begin 
+  clk = 1b0;
+#300 $finish 
+  end
+  initial begin
+  #10 d=0;
+#10 d=1;
+#10 d=0;
+#10 d=1;
+$finish 
+  end 
+  endmodule
